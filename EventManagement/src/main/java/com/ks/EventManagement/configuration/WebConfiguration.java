@@ -7,6 +7,8 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 
+import static com.ks.EventManagement.entity.authority.Role.*;
+
 @Configuration
 public class WebConfiguration {
 
@@ -14,8 +16,16 @@ public class WebConfiguration {
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
                 .cors(cors -> cors.disable())
-                .csrf(csrf -> csrf.disable());
-                //.formLogin(f -> f.permitAll())
+                .csrf(csrf -> csrf.disable())
+                .authorizeHttpRequests(req -> req
+                        .requestMatchers(WHITE_LIST_AREA).permitAll()
+                        .requestMatchers(RESTRICTED_LIST_AREA).authenticated()
+                        .requestMatchers(SPECIAL_LIST_AREA).hasAnyRole(String.valueOf(ROOT) , String.valueOf(ANYKEY))
+                        .anyRequest().authenticated()
+                )
+                .formLogin(f -> f
+                        .permitAll()
+                );
         return http.build();
     }
 
@@ -23,4 +33,14 @@ public class WebConfiguration {
     public PasswordEncoder passwordEncoder(){
         return new BCryptPasswordEncoder(12);
     }
+
+    private final static String[] WHITE_LIST_AREA = {
+            "/", "/hello", "/main"
+    };
+    private final static String[] RESTRICTED_LIST_AREA = {
+            "/info"
+    };
+    private final static String[] SPECIAL_LIST_AREA = {
+            "/root",
+    };
 }
