@@ -35,7 +35,7 @@ public class WebConfiguration {
     }
 
     private final static String[] WHITE_LIST_AREA = {
-            "/", "/hello", "/main"
+            "/", "/user/save", "/user/login"
     };
     private final static String[] RESTRICTED_LIST_AREA = {
             "/info"
