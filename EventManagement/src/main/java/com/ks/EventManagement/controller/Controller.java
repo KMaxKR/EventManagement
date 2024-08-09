@@ -10,7 +10,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.rmi.ServerException;
+import java.security.Principal;
+
 
 @RestController
 @AllArgsConstructor
@@ -37,5 +38,10 @@ public class Controller {
     @RequestMapping("/user/save")
     public int saveUser(@RequestBody UserDto dto){
         return userService.saveUser(dto); //return also status code for operation
+    }
+
+    @RequestMapping("/info")
+    public String returnUserInfo(Principal principal){
+        return principal.toString();
     }
 }
