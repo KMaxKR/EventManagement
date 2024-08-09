@@ -5,10 +5,7 @@ import com.ks.EventManagement.service.UserService;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.AllArgsConstructor;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.security.Principal;
 
@@ -37,11 +34,17 @@ public class Controller {
 
     @RequestMapping("/user/save")
     public int saveUser(@RequestBody UserDto dto){
-        return userService.saveUser(dto); //return also status code for operation
+        return userService.saveUser(dto); //return also status for operation
     }
 
     @RequestMapping("/info")
     public String returnUserInfo(Principal principal){
         return principal.toString();
+    }
+
+    @RequestMapping("/search/info/{username}")
+    public String searchUser(@PathVariable("username")String username){
+        //some changes in user settings by root/admin such as isActive account
+        return userService.loadUserByUsername(username).toString();
     }
 }

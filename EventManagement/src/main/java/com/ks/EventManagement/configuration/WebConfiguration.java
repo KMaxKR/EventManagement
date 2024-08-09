@@ -41,6 +41,6 @@ public class WebConfiguration {
             "/info"
     };
     private final static String[] SPECIAL_LIST_AREA = {
-            "/root",
+            "/root", "/search/info/{username}"
     };
 }

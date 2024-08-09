@@ -37,4 +37,11 @@ public class UserService implements UserDetailsService {
             return 400;
         }
     }
+
+    public User returnUserByEmail(String email){
+        return userRepository.findUserByUsername(email)
+                .orElseThrow(() -> new RuntimeException("No such email"));
+    }
+
+
 }
