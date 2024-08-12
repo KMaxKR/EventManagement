@@ -1,16 +1,25 @@
 package com.ks.EventManagement.configuration;
 
+import com.ks.EventManagement.configuration.filter.JwtAuthFilter;
+import com.ks.EventManagement.configuration.filter.JwtEntryPoint;
+import lombok.AllArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 import static com.ks.EventManagement.entity.authority.Role.*;
 
 @Configuration
+@AllArgsConstructor
+@EnableWebSecurity
 public class WebConfiguration {
+    private final JwtEntryPoint jwtEntryPoint;
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
@@ -23,9 +32,9 @@ public class WebConfiguration {
                         .requestMatchers(SPECIAL_LIST_AREA).hasAnyRole(String.valueOf(ROOT) , String.valueOf(ANYKEY))
                         .anyRequest().authenticated()
                 )
-                .formLogin(f -> f
-                        .permitAll()
-                );
+                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .addFilterBefore(new JwtAuthFilter(), UsernamePasswordAuthenticationFilter.class)
+                .exceptionHandling(ex -> ex.authenticationEntryPoint(jwtEntryPoint));
         return http.build();
     }
 
