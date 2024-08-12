@@ -1,6 +1,7 @@
 package com.ks.EventManagement.controller;
 
 import com.ks.EventManagement.dto.UserDto;
+import com.ks.EventManagement.service.EmailService;
 import com.ks.EventManagement.service.UserService;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -14,6 +15,7 @@ import java.security.Principal;
 @AllArgsConstructor
 public class Controller {
     private final UserService userService;
+    private final EmailService emailService;
 
     @RequestMapping("/")
     public String returnPage(){
@@ -46,5 +48,12 @@ public class Controller {
     public String searchUser(@PathVariable("username")String username){
         //some changes in user settings by root/admin such as isActive account
         return userService.loadUserByUsername(username).toString();
+    }
+
+    @RequestMapping("/user/verification/{to}")
+    public String sendEmail(@PathVariable(name = "to") String to){
+        // test email sender
+        emailService.sendEmail(to, "Verification", "Verification Email");
+        return "sent";
     }
 }
