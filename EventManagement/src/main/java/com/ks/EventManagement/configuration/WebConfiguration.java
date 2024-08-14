@@ -20,6 +20,7 @@ import static com.ks.EventManagement.entity.authority.Role.*;
 @EnableWebSecurity
 public class WebConfiguration {
     private final JwtEntryPoint jwtEntryPoint;
+    private final JwtAuthFilter jwtAuthFilter;
 
 
     @Bean
@@ -34,7 +35,7 @@ public class WebConfiguration {
                         .anyRequest().authenticated()
                 )
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                .addFilterBefore(new JwtAuthFilter(), UsernamePasswordAuthenticationFilter.class)
+                .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
                 .exceptionHandling(ex -> ex.authenticationEntryPoint(jwtEntryPoint));
         return http.build();
     }

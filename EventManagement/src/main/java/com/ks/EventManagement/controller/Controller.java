@@ -5,11 +5,17 @@ import com.ks.EventManagement.service.EmailService;
 import com.ks.EventManagement.service.UserService;
 import com.ks.EventManagement.utility.JWT;
 import jakarta.servlet.ServletException;
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.AllArgsConstructor;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.security.Principal;
 
 
@@ -36,7 +42,7 @@ public class Controller {
 //        }catch (ServletException serverException){
 //            return "Something went wrong try again";
 //        }
-            jwt.loginUser(username, password, response);
+        jwt.loginUser(username, password, response);
     }
 
     @RequestMapping("/user/save")

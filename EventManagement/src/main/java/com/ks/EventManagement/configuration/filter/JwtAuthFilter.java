@@ -7,6 +7,8 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import lombok.AllArgsConstructor;
+import lombok.NoArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -19,23 +21,34 @@ import org.springframework.web.filter.OncePerRequestFilter;
 import java.io.IOException;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
-import java.util.Arrays;
 import java.util.Objects;
 
 @Component
-@RequiredArgsConstructor
+@AllArgsConstructor
 public class JwtAuthFilter extends OncePerRequestFilter {
-    private JWT jwt;
-    private UserService userService;
-
+    private final JWT jwt;
+    private final UserService userService;
 
     @Override
     protected void doFilterInternal(HttpServletRequest request,
                                     HttpServletResponse response,
                                     FilterChain filterChain) throws ServletException, IOException {
-        String token = getTokenFromRequest(request, response);
-        if (StringUtils.hasText(token) && jwt.isValid(token)){
-            String username = jwt.getUsernameFromToken(token);
+        String bearerToken = "";
+        Cookie[] cookies = request.getCookies();
+        if (cookies != null) {
+            for (Cookie el : cookies) {
+                if (Objects.equals(el.getName(), "AUTHORIZATION")) {
+                    response.addCookie(new Cookie("AUTHORIZATION", el.getValue()));
+                    bearerToken = URLDecoder.decode(el.getValue(), StandardCharsets.UTF_8);
+                    if (StringUtils.hasText(bearerToken) && bearerToken.startsWith("Bearer ")) {
+                        bearerToken = bearerToken.substring(7);
+                    }
+                }
+            }
+        }
+        //todo isValid to work properly
+        if (StringUtils.hasText(bearerToken) ) {
+            String username = jwt.getUsernameFromToken(bearerToken);
 
             UserDetails userDetails = userService.loadUserByUsername(username);
             UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
@@ -43,20 +56,5 @@ public class JwtAuthFilter extends OncePerRequestFilter {
             SecurityContextHolder.getContext().setAuthentication(auth);
         }
         filterChain.doFilter(request, response);
-    }
-
-    private String getTokenFromRequest(HttpServletRequest request, HttpServletResponse response){
-        String bearerToken = "";
-        Cookie[] cookies = request.getCookies();
-        for (Cookie el:cookies){
-            if (Objects.equals(el.getName(),"AUTHORIZATION")){
-                response.addCookie(new Cookie("AUTHORIZATION", el.getValue()));
-                bearerToken = URLDecoder.decode(el.getValue(), StandardCharsets.UTF_8);
-                if (StringUtils.hasText(bearerToken) && bearerToken.startsWith("Bearer ")){
-                    return bearerToken.substring(7);
-                }
-            }
-        }
-        return bearerToken;
     }
 }
