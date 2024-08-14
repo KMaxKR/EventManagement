@@ -3,67 +3,59 @@ package com.ks.EventManagement.utility;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.AllArgsConstructor;
-import org.springframework.security.authentication.AuthenticationCredentialsNotFoundException;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.function.Function;
 
 @Service
 @AllArgsConstructor
 public class JWT {
+    private final SecurityCont securityCont;
+    private final static String key = "javacJWT24";
 
     //generate token
-    private Claims extractAllClaims(String token){
-        return Jwts
-                .parser()
-                .setSigningKey(SecurityCont.JWT_KEY)
-                .parseClaimsJwt(token)
-                .getBody();
+    private String generateToken(Authentication authentication){
+        String token = "";
+        try {
+            token = Jwts.builder()
+                    .setSubject(authentication.getName())
+                    .claim("username", authentication.getName())
+                    .setIssuedAt(new Date())
+                    .setExpiration(new Date(System.currentTimeMillis() + SecurityCont.EXPIRATION))
+                    .signWith(SignatureAlgorithm.HS256, key)
+                    .compact();
+        }catch (Exception e){
+            System.out.println("Generation token error" + e.toString());
+        }
+        return token;
     }
 
-    private <T> T extractClaims(String token, Function<Claims, T>claimsTFunction){
-        final Claims claims = extractAllClaims(token);
-        return claimsTFunction.apply(claims);
+    public Claims getClaims(String token){
+        return Jwts.parser().setSigningKey(key).parseClaimsJwt(token).getBody();
     }
 
-    private String generateToken(Map<String, Object> extractClaims, Authentication authentication){
-        return Jwts.builder()
-                .setClaims(extractClaims)
-                .setSubject(authentication.getName())
-                .setIssuedAt(new Date())
-                .setExpiration(new Date(System.currentTimeMillis() + SecurityCont.EXPIRATION))
-                .signWith(SignatureAlgorithm.HS512, SecurityCont.JWT_KEY)
-                .compact();
-    }
-
-    private Date extractExpiration(String token){
-        return extractClaims(token, Claims::getExpiration);
-    }
-
-    private boolean isTokenExpired(String token){
-        return extractExpiration(token).before(new Date());
-    }
-
-    public String extractUsername(String token){
-        return extractClaims(token, Claims::getSubject);
-    }
-
-    public String generate(Authentication authentication){
-        return generateToken(new HashMap<>(), authentication);
+    public String getUsernameFromToken(String token){
+        return getClaims(token).getSubject();
     }
 
     public boolean isValid(String token){
-        final String username = extractUsername(token);
-        try{
-                Jwts.parser().setSigningKey(SecurityCont.JWT_KEY).parseClaimsJwt(token);
-                return true;
-        }catch (AuthenticationCredentialsNotFoundException e){
-            throw new AuthenticationCredentialsNotFoundException("AuthenticationCredentialsNotFound Error");
-        }
+        return getClaims(token).getExpiration().before(new Date());
+    }
+
+    public void loginUser(String username, String password, HttpServletResponse response){
+        Authentication auth = new UsernamePasswordAuthenticationToken(username, password);
+        SecurityContextHolder.getContext().setAuthentication(auth);
+        String token = generateToken(auth);
+        Cookie cookie = new Cookie("AUTHORIZATION", URLEncoder.encode(token, StandardCharsets.UTF_8));
+        cookie.setMaxAge(10000);
+        response.addCookie(cookie);
     }
 }

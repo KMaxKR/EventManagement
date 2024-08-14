@@ -5,7 +5,6 @@ import jakarta.mail.internet.InternetAddress;
 import jakarta.mail.internet.MimeMessage;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Component;
 
 import java.util.Properties;
@@ -54,4 +53,7 @@ public class EmailService {
             System.out.println(e);
         }
     }
+
+    //TODO
+    // verification code validation
 }

@@ -3,8 +3,10 @@ package com.ks.EventManagement.controller;
 import com.ks.EventManagement.dto.UserDto;
 import com.ks.EventManagement.service.EmailService;
 import com.ks.EventManagement.service.UserService;
+import com.ks.EventManagement.utility.JWT;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.AllArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
@@ -16,6 +18,7 @@ import java.security.Principal;
 public class Controller {
     private final UserService userService;
     private final EmailService emailService;
+    private final JWT jwt;
 
     @RequestMapping("/")
     public String returnPage(){
@@ -23,15 +26,17 @@ public class Controller {
     }
 
     @RequestMapping("/user/login")
-    public String loginPage(HttpServletRequest request,
+    public void loginPage(HttpServletRequest request,
+                        HttpServletResponse response,
                         @RequestParam("username") String username,
                         @RequestParam("password") String password){
-        try {
-            request.login(username, password);
-            return "Logged successfully";
-        }catch (ServletException serverException){
-            return "Something went wrong try again";
-        }
+//        try {
+//            request.login(username, password);
+//            return "Logged successfully";
+//        }catch (ServletException serverException){
+//            return "Something went wrong try again";
+//        }
+            jwt.loginUser(username, password, response);
     }
 
     @RequestMapping("/user/save")

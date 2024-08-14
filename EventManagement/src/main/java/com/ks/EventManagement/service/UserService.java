@@ -21,6 +21,7 @@ public class UserService implements UserDetailsService {
                 .orElseThrow(() -> new UsernameNotFoundException("No such user with that username: " + username));
     }
 
+    //Save user (registration)
     public int saveUser(UserDto dto){
         try{
             userRepository.save(User.builder()
@@ -30,7 +31,7 @@ public class UserService implements UserDetailsService {
                             .email(dto.getEmail())
                             .role(Role.USER)
                             .password(new BCryptPasswordEncoder(12).encode(dto.getPassword()))
-                            .active(true)
+                            .active(false)
                     .build());
             return 200;
         }catch (Exception e){
@@ -38,10 +39,16 @@ public class UserService implements UserDetailsService {
         }
     }
 
+    //Update user status to active
+    public void updateUserStatus(String username, boolean status){
+        User user = loadUserByUsername(username);
+        user.setActive(status);
+        userRepository.save(user);
+    }
+
+    // return user by email
     public User returnUserByEmail(String email){
         return userRepository.findUserByUsername(email)
                 .orElseThrow(() -> new RuntimeException("No such email"));
     }
-
-
 }

@@ -21,6 +21,7 @@ import static com.ks.EventManagement.entity.authority.Role.*;
 public class WebConfiguration {
     private final JwtEntryPoint jwtEntryPoint;
 
+
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
