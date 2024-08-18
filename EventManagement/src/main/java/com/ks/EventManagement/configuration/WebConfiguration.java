@@ -50,7 +50,7 @@ public class WebConfiguration {
             "/user/verification/{to}"
     };
     private final static String[] RESTRICTED_LIST_AREA = {
-            "/info"
+            "/info", "/status"
     };
     private final static String[] SPECIAL_LIST_AREA = {
             "/root", "/search/info/{username}"

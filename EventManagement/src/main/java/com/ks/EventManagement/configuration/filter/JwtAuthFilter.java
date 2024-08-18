@@ -47,7 +47,7 @@ public class JwtAuthFilter extends OncePerRequestFilter {
             }
         }
         //todo isValid to work properly
-        if (StringUtils.hasText(bearerToken) ) {
+        if (StringUtils.hasText(bearerToken) && jwt.isValid(bearerToken)) {
             String username = jwt.getUsernameFromToken(bearerToken);
 
             UserDetails userDetails = userService.loadUserByUsername(username);

@@ -28,7 +28,7 @@ public class JWT {
             token = Jwts.builder()
                     .setSubject(authentication.getName())
                     .setIssuedAt(new Date())
-                    .setExpiration(new Date(System.currentTimeMillis() + 60*60*10000L))
+                    .setExpiration(new Date(System.currentTimeMillis() + 60*60*100))
                     .signWith(SignatureAlgorithm.HS256, key)
                     .compact();
         }catch (Exception e){
@@ -47,7 +47,9 @@ public class JWT {
 
     public boolean isValid(String token){
         final Date expiration = getClaim(token).getExpiration();
-        return expiration.before(new Date());
+        System.out.println(getClaim(token).getExpiration());
+        System.out.println((new Date()).before(expiration));
+        return (new Date()).before(expiration);
     }
 
     public void loginUser(String username, String password, HttpServletResponse response){
