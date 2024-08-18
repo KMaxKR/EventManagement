@@ -2,6 +2,7 @@ package com.ks.EventManagement.configuration.filter;
 
 import com.ks.EventManagement.service.UserService;
 import com.ks.EventManagement.utility.JWT;
+import io.jsonwebtoken.ExpiredJwtException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.Cookie;
@@ -46,14 +47,18 @@ public class JwtAuthFilter extends OncePerRequestFilter {
                 }
             }
         }
-        //todo isValid to work properly
-        if (StringUtils.hasText(bearerToken) && jwt.isValid(bearerToken)) {
-            String username = jwt.getUsernameFromToken(bearerToken);
+        try {
+            if (StringUtils.hasText(bearerToken) && jwt.isValid(bearerToken)) {
+                String username = jwt.getUsernameFromToken(bearerToken);
 
-            UserDetails userDetails = userService.loadUserByUsername(username);
-            UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
-            auth.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-            SecurityContextHolder.getContext().setAuthentication(auth);
+                UserDetails userDetails = userService.loadUserByUsername(username);
+                UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
+                auth.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+                SecurityContextHolder.getContext().setAuthentication(auth);
+            }
+        }catch (ExpiredJwtException e){
+            System.out.println("Token expired.... redirection");
+            response.sendRedirect("/");
         }
         filterChain.doFilter(request, response);
     }

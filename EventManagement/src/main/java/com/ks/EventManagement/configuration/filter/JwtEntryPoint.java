@@ -13,6 +13,9 @@ import java.io.IOException;
 public class JwtEntryPoint implements AuthenticationEntryPoint {
     @Override
     public void commence(HttpServletRequest request, HttpServletResponse response, AuthenticationException authException) throws IOException, ServletException {
-        response.sendError(HttpServletResponse.SC_UNAUTHORIZED, authException.getMessage());
+        //response.sendError(HttpServletResponse.SC_UNAUTHORIZED, authException.getMessage());
+
+        // redirect user to main page if token expired
+        response.sendRedirect("/");
     }
 }
